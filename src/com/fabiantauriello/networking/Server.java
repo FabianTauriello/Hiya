@@ -1,31 +1,25 @@
 package com.fabiantauriello.networking;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Server {
-    // The port number here isn't important - as long as it's in range and not being used by another application.
     private static final int PORT = 9090;
     public static void main(String[] args) {
-        // Declare ServerSocket
-        ServerSocket listener;
+    	ServerSocket listener;
         try {
-            // Initialize ServerSocket
-            listener = new ServerSocket(PORT);
-            System.out.println("The date server is running...");
-            // Keep the server open and listening for a client to connect
+        	listener = new ServerSocket(PORT);
+            System.out.println("The capitalization server is running...");
+            // Thread Pools are useful when you need to limit the number of threads running in your 
+            // application to optimize performance. Here, I've set the pool size to accept 20 threads.
+            ExecutorService pool = Executors.newFixedThreadPool(20);
             while (true) {
-                // Listens for a connection to be made to this socket and accepts it. The method blocks until a connection is made.
-                Socket socket = listener.accept();
-                PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                // Output the current date to the connected client.
-                out.println(new Date().toString());
+                pool.execute(new Capitalizer(listener.accept()));
+                // System.out.println("Current pool size: " + pool.toString());
             }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        } catch (Exception e) {
+			e.printStackTrace();
+		}
     }
 }
